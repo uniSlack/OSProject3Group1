@@ -9,7 +9,7 @@
 #define UNUSED(x) (void)(x)
 
 
-struct block_store_t
+struct block_store
 {
    size_t id;
    size_t used_blocks;
@@ -17,12 +17,31 @@ struct block_store_t
    size_t total_blocks;
    size_t bytes_read;
    size_t bytes_written;
+   int32_t blocks[BLOCK_STORE_NUM_BLOCKS];
+   bitmap_t* bitmap;
    bool success;
 };
 
+
+///
+/// This creates a new BS device, ready to go
+/// \return Pointer to a new block storage device, NULL on error
+///
 block_store_t *block_store_create()
 {
-    return NULL;
+    block_store_t *bs = (block_store_t *) calloc(1, sizeof(block_store_t)); // zero intialize block store
+
+    if(bs){
+        // create free block bitmap from overlay of starting block
+        bs->bitmap = bitmap_overlay(BITMAP_SIZE_BYTES, &bs->blocks[BITMAP_START_BLOCK]); 
+
+        // requests to assign the starting block to the bit map
+        if(bs->bitmap && block_store_request(bs, BITMAP_START_BLOCK)){  //TODO implement block_store_request
+            return bs;
+        }
+    }
+    free(bs);
+    return NULL; // errored out
 }
 
 void block_store_destroy(block_store_t *const bs)
@@ -39,7 +58,7 @@ bool block_store_request(block_store_t *const bs, const size_t block_id)
 {
     UNUSED(bs);
     UNUSED(block_id);
-    return false;
+    return true; //DUMMY RETURN FOR NOW
 }
 
 void block_store_release(block_store_t *const bs, const size_t block_id)

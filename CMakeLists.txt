@@ -21,6 +21,6 @@ add_library(bitmap src/bitmap.c)
 add_library(block_store src/block_store.c)
 
 # make an executable
-add_executable(${PROJECT_NAME}_test test/tests.cpp)
+add_executable(${PROJECT_NAME}_test test/tests.cpp src/bitmap.c)
 target_compile_definitions(${PROJECT_NAME}_test PRIVATE)
 target_link_libraries(${PROJECT_NAME}_test gtest pthread block_store)
