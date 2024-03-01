@@ -8,6 +8,18 @@
 // remove it before you submit. Just allows things to compile initially.
 #define UNUSED(x) (void)(x)
 
+
+struct block_store_t
+{
+   size_t id;
+   size_t used_blocks;
+   size_t free_blocks;
+   size_t total_blocks;
+   size_t bytes_read;
+   size_t bytes_written;
+   bool success;
+};
+
 block_store_t *block_store_create()
 {
     return NULL;
