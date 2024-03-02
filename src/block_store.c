@@ -46,7 +46,10 @@ block_store_t *block_store_create()
 
 void block_store_destroy(block_store_t *const bs)
 {
-    UNUSED(bs);
+    if (bs != NULL) {
+        free(bs->bitmap);
+    }
+    free(bs);
 }
 size_t block_store_allocate(block_store_t *const bs)
 {
