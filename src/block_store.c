@@ -69,14 +69,10 @@ size_t block_store_allocate(block_store_t *const bs)
     return SIZE_MAX; //errored out
 }
 
-/// marks a specific block as allocated in the bitmap. It first checks if the pointer to the
-/// block store is not NULL and if the block_id is within the range of valid block indices. 
-/// If the block is already marked as allocated, it returns false. Otherwise, it marks the 
-/// block as allocated and checks that the block was indeed marked as allocated by testing 
-/// the bitmap. It returns true if the block was successfully marked as allocated, false otherwise.
-/// @param bs block storage device           bitmap_ffz(bs->bitmap)
+/// marks a specific block as allocated in the bitmap. 
+/// @param bs block storage device 
 /// @param block_id id of the block
-/// @return 
+/// @return true if the block was successfully marked as allocated, false otherwise.
 bool block_store_request(block_store_t *const bs, const size_t block_id)
 {
     // checks that bs is not null and that block_id is within valid range
