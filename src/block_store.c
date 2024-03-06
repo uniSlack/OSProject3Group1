@@ -33,7 +33,7 @@ block_store_t *block_store_create()
 
     if(bs){
         // create free block bitmap from overlay of starting block
-        bs->bitmap = bitmap_overlay(BITMAP_SIZE_BYTES, &bs->blocks[BITMAP_START_BLOCK]); 
+        bs->bitmap = bitmap_overlay(BITMAP_SIZE_BITS, &bs->blocks[BITMAP_START_BLOCK]); 
 
         // requests to assign the starting block to the bit map
         if(bs->bitmap && block_store_request(bs, BITMAP_START_BLOCK)){  //TODO implement block_store_request
@@ -51,10 +51,23 @@ void block_store_destroy(block_store_t *const bs)
     }
     free(bs);
 }
+
+///
+/// Searches for a free block, marks it as in use, and returns the block's id
+/// \param bs BS device
+/// \return Allocated block's id, SIZE_MAX on error
+///
 size_t block_store_allocate(block_store_t *const bs)
 {
-    UNUSED(bs);
-    return 0;
+    if (bs){
+        size_t index = bitmap_ffz(bs->bitmap);      // find the first zero in the bit map, ie the first unallocated block
+        if (index != SIZE_MAX) {
+            bitmap_set(bs->bitmap, index);          // set that zero to one, claiming that block as allocated
+            return index;                           // return the index of the allocated block
+        }
+    }
+
+    return SIZE_MAX; //errored out
 }
 
 bool block_store_request(block_store_t *const bs, const size_t block_id)
@@ -84,7 +97,7 @@ size_t block_store_get_free_blocks(const block_store_t *const bs)
 
 size_t block_store_get_total_blocks()
 {
-    return 0;
+    return BLOCK_STORE_NUM_BLOCKS;
 }
 
 size_t block_store_read(const block_store_t *const bs, const size_t block_id, void *buffer)
