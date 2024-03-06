@@ -59,7 +59,7 @@ void block_store_destroy(block_store_t *const bs)
 ///
 size_t block_store_allocate(block_store_t *const bs)
 {
-    if (bs){
+    if (bs && bs->bitmap){
         size_t index = bitmap_ffz(bs->bitmap);      // find the first zero in the bit map, ie the first unallocated block
         if (index != SIZE_MAX) {
             bitmap_set(bs->bitmap, index);          // set that zero to one, claiming that block as allocated
