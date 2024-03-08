@@ -75,7 +75,7 @@ size_t block_store_allocate(block_store_t *const bs)
 bool block_store_request(block_store_t *const bs, const size_t block_id)
 {
     // checks that bs is not null and that block_id is within valid range
-    if(bs != NULL && block_id >= BITMAP_START_BLOCK && block_id <= BITMAP_START_BLOCK + BITMAP_NUM_BLOCKS) {
+    if(bs != NULL && block_id <= BITMAP_SIZE_BITS) {
         if(bitmap_test(bs->bitmap, block_id)){ return false; }          // return false if the block is already allocated
         else {
             bitmap_set(bs->bitmap, block_id);                           // mark block as allocated
@@ -95,7 +95,7 @@ bool block_store_request(block_store_t *const bs, const size_t block_id)
 void block_store_release(block_store_t *const bs, const size_t block_id)
 {
     //  checks that bs is not NULL and  block_id is within the range of valid block indices
-    if (bs != NULL && block_id >= BITMAP_START_BLOCK && block_id <= BITMAP_START_BLOCK + BITMAP_NUM_BLOCKS) {
+    if (bs != NULL && block_id <= BITMAP_SIZE_BITS) {
         bitmap_reset(bs->bitmap, block_id);     //clears the bit in the bitmap
     }
     return;
