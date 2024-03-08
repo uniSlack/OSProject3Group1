@@ -33,7 +33,6 @@ block_store_t *block_store_create()
     if(bs){
         // create free block bitmap from overlay of starting block
         bs->bitmap = bitmap_overlay(BITMAP_SIZE_BITS, &bs->blocks[BITMAP_START_BLOCK]); 
-
         // requests to assign the starting block to the bit map
         if(bs->bitmap && block_store_request(bs, BITMAP_START_BLOCK)){  //TODO implement block_store_request
             return bs;
@@ -76,8 +75,7 @@ size_t block_store_allocate(block_store_t *const bs)
 bool block_store_request(block_store_t *const bs, const size_t block_id)
 {
     // checks that bs is not null and that block_id is within valid range
-    if(bs != NULL && block_id >= BITMAP_START_BLOCK && block_id <= BITMAP_NUM_BLOCKS) {
-        
+    if(bs != NULL && block_id >= BITMAP_START_BLOCK && block_id <= BITMAP_START_BLOCK + BITMAP_NUM_BLOCKS) {
         if(bitmap_test(bs->bitmap, block_id)){ return false; }          // return false if the block is already allocated
         else {
             bitmap_set(bs->bitmap, block_id);                           // mark block as allocated
@@ -88,16 +86,33 @@ bool block_store_request(block_store_t *const bs, const size_t block_id)
     //return false if the pointer is null or if the block_id is invalid
     return false; 
 }
+
+///
+/// Frees the specified block
+/// \param bs BS device
+/// \param block_id The block to free
+///
 void block_store_release(block_store_t *const bs, const size_t block_id)
 {
-    UNUSED(bs);
-    UNUSED(block_id);
+    //  checks that bs is not NULL and  block_id is within the range of valid block indices
+    if (bs != NULL && block_id >= BITMAP_START_BLOCK && block_id <= BITMAP_START_BLOCK + BITMAP_NUM_BLOCKS) {
+        bitmap_reset(bs->bitmap, block_id);     //clears the bit in the bitmap
+    }
+    return;
 }
 
+///
+/// Counts the number of blocks marked as in use
+/// \param bs BS device
+/// \return Total blocks in use, SIZE_MAX on error
+///
 size_t block_store_get_used_blocks(const block_store_t *const bs)
 {
-    UNUSED(bs);
-    return 0;
+    // Check for NULL pointer
+    if (bs != NULL) {
+        return bitmap_total_set(bs->bitmap);   //returns number of set bits in the bitmap
+    }
+    return SIZE_MAX;    //error
 }
 
 size_t block_store_get_free_blocks(const block_store_t *const bs)
