@@ -34,7 +34,7 @@ block_store_t *block_store_create()
         // create free block bitmap from overlay of starting block
         bs->bitmap = bitmap_overlay(BITMAP_SIZE_BITS, &bs->blocks[BITMAP_START_BLOCK]); 
         // requests to assign the starting block to the bit map
-        if(bs->bitmap && block_store_request(bs, BITMAP_START_BLOCK)){  //TODO implement block_store_request
+        if(bs->bitmap && block_store_request(bs, BITMAP_START_BLOCK) && block_store_request(bs, BITMAP_START_BLOCK + 1)){  
             return bs;
         }
     }
