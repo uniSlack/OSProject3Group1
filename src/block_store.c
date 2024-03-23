@@ -114,11 +114,18 @@ size_t block_store_get_used_blocks(const block_store_t *const bs)
     }
     return SIZE_MAX;    //error
 }
-
+/// Counts the number of blocks that are free
+/// @param bs BS device
+/// @return the number of free blocks, SIZE_MAX on error
 size_t block_store_get_free_blocks(const block_store_t *const bs)
 {
-    UNUSED(bs);
-    return 0;
+    //checks that the bs is not NULL
+    if(bs != NULL){
+        //gets the difference between the total number of blocks and the number of used blocks
+        size_t dif = block_store_get_total_blocks - block_store_get_used_blocks(bs);    
+        return dif;
+    }
+    return SIZE_MAX;    //eroor
 }
 
 size_t block_store_get_total_blocks()
