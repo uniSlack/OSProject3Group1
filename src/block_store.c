@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include "bitmap.h"
 #include "block_store.h"
 // include more if you need
@@ -17,7 +18,7 @@ struct block_store
    size_t total_blocks;
    size_t bytes_read;
    size_t bytes_written;
-   int32_t blocks[BLOCK_STORE_NUM_BLOCKS];
+   char blocks[BLOCK_STORE_NUM_BLOCKS][BLOCK_SIZE_BYTES];
    bitmap_t* bitmap;
    bool success;
 };
@@ -114,6 +115,7 @@ size_t block_store_get_used_blocks(const block_store_t *const bs)
     }
     return SIZE_MAX;    //error
 }
+
 /// Counts the number of blocks that are free
 /// @param bs BS device
 /// @return the number of free blocks, SIZE_MAX on error
@@ -122,10 +124,10 @@ size_t block_store_get_free_blocks(const block_store_t *const bs)
     //checks that the bs is not NULL
     if(bs != NULL){
         //gets the difference between the total number of blocks and the number of used blocks
-        size_t dif = block_store_get_total_blocks - block_store_get_used_blocks(bs);    
+        size_t dif = block_store_get_total_blocks(bs) - block_store_get_used_blocks(bs);    
         return dif;
     }
-    return SIZE_MAX;    //eroor
+    return SIZE_MAX;    //error
 }
 
 size_t block_store_get_total_blocks()
@@ -133,19 +135,34 @@ size_t block_store_get_total_blocks()
     return BLOCK_STORE_NUM_BLOCKS;
 }
 
+/// Reads data from the specified block and writes it to the designated buffer
+/// \param bs BS device
+/// \param block_id Source block id
+/// \param buffer Data buffer to write to
+/// \return Number of bytes read, 0 on error
 size_t block_store_read(const block_store_t *const bs, const size_t block_id, void *buffer)
 {
-    UNUSED(bs);
-    UNUSED(block_id);
-    UNUSED(buffer);
+    if(bs && block_id < BLOCK_STORE_NUM_BLOCKS && buffer){
+        if(memcpy(buffer, &(bs->blocks[block_id]), BLOCK_SIZE_BYTES)){
+            return BLOCK_SIZE_BYTES;
+        }
+    }
     return 0;
 }
 
+/// Reads data from the specified buffer and writes it to the designated block
+/// \param bs BS device
+/// \param block_id Destination block id
+/// \param buffer Data buffer to read from
+/// \return Number of bytes written, 0 on error
 size_t block_store_write(block_store_t *const bs, const size_t block_id, const void *buffer)
 {
-    UNUSED(bs);
-    UNUSED(block_id);
-    UNUSED(buffer);
+    if(bs && block_id < BLOCK_STORE_NUM_BLOCKS && buffer){
+        block_store_request(bs, block_id);  // allocate on bitmap if not done before. Not sure what behaviour should be if already allocated, assuming intentional overwrite
+        if(memcpy(&(bs->blocks[block_id]), buffer, BLOCK_SIZE_BYTES)){
+            return BLOCK_SIZE_BYTES;
+        }   
+    }
     return 0;
 }
 
