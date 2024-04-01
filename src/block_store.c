@@ -4,6 +4,12 @@
 #include "bitmap.h"
 #include "block_store.h"
 // include more if you need
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 
 // You might find this handy.  I put it around unused parameters, but you should
 // remove it before you submit. Just allows things to compile initially.
@@ -174,7 +180,24 @@ block_store_t *block_store_deserialize(const char *const filename)
 
 size_t block_store_serialize(const block_store_t *const bs, const char *const filename)
 {
-    UNUSED(bs);
-    UNUSED(filename);
-    return 0;
+    int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (fd == -1) {
+        // Handle file opening error
+        return 0;
+    }
+
+    size_t bytes_written = 0;
+
+    // Write block store data to the file
+    ssize_t write_size = write(fd, bs, sizeof(block_store_t));
+    if (write_size != sizeof(block_store_t)) {
+        // Handle write error
+        close(fd);
+        return 0;
+    }
+    bytes_written += write_size;
+
+    // Close the file
+    close(fd);
+    return bytes_written;
 }
