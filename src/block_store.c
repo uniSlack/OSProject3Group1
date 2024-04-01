@@ -180,6 +180,11 @@ block_store_t *block_store_deserialize(const char *const filename)
 
 size_t block_store_serialize(const block_store_t *const bs, const char *const filename)
 {
+    if(!bs || !filename){
+        // Handle nulls
+        return 0;
+    }
+
     int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if (fd == -1) {
         // Handle file opening error
@@ -189,8 +194,8 @@ size_t block_store_serialize(const block_store_t *const bs, const char *const fi
     size_t bytes_written = 0;
 
     // Write block store data to the file
-    ssize_t write_size = write(fd, bs, sizeof(block_store_t));
-    if (write_size != sizeof(block_store_t)) {
+    ssize_t write_size = write(fd, bs->bitmap, sizeof(char) * BLOCK_STORE_NUM_BLOCKS * BLOCK_SIZE_BYTES);
+    if (write_size != sizeof(char) * BLOCK_STORE_NUM_BLOCKS * BLOCK_SIZE_BYTES) {
         // Handle write error
         close(fd);
         return 0;
